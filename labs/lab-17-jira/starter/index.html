@@ -1662,7 +1662,7 @@ function submitComment(isInternal) {
   document.getElementById('comment-text').value = '';
   renderActivityLog(currentDetailKey);
   // Switch back to log tab to show the new comment
-  switchActivityTab('log', document.querySelectorAll('.activity-tab')[0]);
+  switchActivityTab('log', document.querySelector('.activity-tab[data-tab="log"]'));
 }
 
 // ─── CREATE MODAL ─────────────────────────────────────────────
