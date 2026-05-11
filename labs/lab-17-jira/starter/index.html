@@ -560,6 +560,8 @@
     }
 
     .detail-field:nth-last-child(-n+2) { border-bottom: none; }
+    /* With 7 fields the last row has only one cell; remove its border too */
+    .detail-field:last-child { border-bottom: none; }
 
     .detail-field-label {
       font-size: 10.5px;
@@ -574,6 +576,18 @@
       font-size: 13px;
       color: #172b4d;
     }
+
+    .type-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .type-badge-incident        { background: #ffebe6; color: #bf2600; }
+    .type-badge-service-request { background: #deebff; color: #0747a6; }
+    .type-badge-problem         { background: #eae6ff; color: #403294; }
+    .type-badge-change          { background: #e3fcef; color: #006644; }
 
     .assignee-select {
       border: 1px solid #dfe1e6;
@@ -1032,7 +1046,7 @@
           <div id="activity-log" class="activity-log"></div>
 
           <div id="comment-form" class="comment-form">
-            <textarea class="comment-textarea" id="comment-text" placeholder="Write a comment..."></textarea>
+            <textarea class="comment-textarea" id="comment-text" placeholder="Write a comment..." oninput="this.style.borderColor=''"></textarea>
             <div class="comment-actions">
               <button class="btn-reply" onclick="submitComment(false)">Reply to customer</button>
               <button class="btn-internal" onclick="submitComment(true)">Add internal note</button>
@@ -1369,6 +1383,16 @@ function ticketByKey(key) {
   return tickets.find(t => t.key === key);
 }
 
+function typeLabel(type) {
+  const map = {
+    'incident':        'Incident',
+    'service-request': 'Service Request',
+    'problem':         'Problem',
+    'change':          'Change',
+  };
+  return map[type] || type;
+}
+
 // ─── RENDER TICKET LIST ───────────────────────────────────────
 
 function renderTicketList() {
@@ -1509,6 +1533,12 @@ function openTicketDetail(key) {
   const avaClass = assigneeAvatarClass(t.assignee);
 
   document.getElementById('detail-fields').innerHTML = `
+    <div class="detail-field">
+      <div class="detail-field-label">Type</div>
+      <div class="detail-field-value">
+        <span class="type-badge type-badge-${escHtml(t.type)}">${escHtml(typeLabel(t.type))}</span>
+      </div>
+    </div>
     <div class="detail-field">
       <div class="detail-field-label">Request Type</div>
       <div class="detail-field-value">${escHtml(t.requestTypeIcon)} ${escHtml(t.requestType)}</div>
@@ -1660,7 +1690,12 @@ function renderActivityLog(key) {
 
 function submitComment(isInternal) {
   const text = document.getElementById('comment-text').value.trim();
-  if (!text) return;
+  if (!text) {
+    const ta = document.getElementById('comment-text');
+    ta.style.borderColor = '#ff5630';
+    ta.focus();
+    return;
+  }
   const t = ticketByKey(currentDetailKey);
   if (!t) return;
   t.comments.push({

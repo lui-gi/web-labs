@@ -182,7 +182,7 @@ or on paper):
 
 2. **Table columns:**
    - Checkbox — for bulk-selecting tickets
-   - Request Type — the ticket category shown with an icon (e.g., Incident, Service Request)
+   - Request Type — the descriptive request category shown with an icon (e.g., "Report a system problem", "Request admin access") — this is the human-readable label for the ticket type
    - Key — the unique ticket ID (e.g., ITSM-1324)
    - Summary — the ticket title; should be a concise description of the issue
    - Reporter — the person who opened the ticket (the user with the problem)
@@ -252,9 +252,9 @@ the queue — it is currently WAITING FOR SUPPORT with a breached SLA (red `-15m
 1. Click ITSM-1324 to open its detail panel.
 2. In the **Assignee** dropdown, assign the ticket to "Sammy ServiceDeskAgent".
 3. Change the **Status** to "In Progress".
-4. Click the **Add a comment** tab to open the comment form. Then click **Add internal note** and type:
+4. Click the **Add a comment** tab to open the comment form. In the textarea, type:
    `Investigating — contacted user to confirm access scope.`
-   Then submit the note.
+   Then click **Add internal note** to submit it.
 
 **Success condition:** The ticket shows status "IN PROGRESS" in both the detail panel
 and the ticket table row. The internal note appears in the Activity log with a yellow
