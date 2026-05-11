@@ -1025,8 +1025,8 @@
 
           <div class="detail-section-title">Activity</div>
           <div class="activity-tabs">
-            <div class="activity-tab active" onclick="switchActivityTab('log', this)">Activity</div>
-            <div class="activity-tab" onclick="switchActivityTab('comment', this)">Add a comment</div>
+            <div class="activity-tab active" data-tab="log" onclick="switchActivityTab('log', this)">Activity</div>
+            <div class="activity-tab" data-tab="comment" onclick="switchActivityTab('comment', this)">Add a comment</div>
           </div>
 
           <div id="activity-log" class="activity-log"></div>
@@ -1113,7 +1113,6 @@ let tickets = [
     summary: 'Admin access to Jira',
     reporter: 'Polly ProductManager',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'WAITING FOR SUPPORT',
     created: '24/Sep/20',
     sla: '-15m',
@@ -1131,7 +1130,6 @@ let tickets = [
     summary: 'Banc.ly Inc is slow',
     reporter: 'Serena ServiceDeskManager',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'WORK IN PROGRESS',
     created: '25/Sep/20',
     sla: '3h 44m',
@@ -1149,7 +1147,6 @@ let tickets = [
     summary: "Can't access POS System",
     reporter: 'Sammy ServiceDeskAgent',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'WORK IN PROGRESS',
     created: '25/Sep/20',
     sla: '3h 44m',
@@ -1164,10 +1161,9 @@ let tickets = [
     requestType: 'Report broken hardware',
     requestTypeIcon: '🖥',
     type: 'incident',
-    summary: 'Cant access webcam',
+    summary: "Can't access webcam",
     reporter: 'Darrel DevManager',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'WORK IN PROGRESS',
     created: '25/Sep/20',
     sla: '3h 44m',
@@ -1185,7 +1181,6 @@ let tickets = [
     summary: "Can't access Trello",
     reporter: 'Sammy ServiceDeskAgent',
     assignee: 'Serena ServiceDeskAgent',
-    assigneeInitials: 'SE',
     status: 'WORK IN PROGRESS',
     created: '25/Sep/20',
     sla: '3h 44m',
@@ -1203,7 +1198,6 @@ let tickets = [
     summary: 'Admin access to Jira',
     reporter: 'Polly ProductManager',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'IN PROGRESS',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1221,7 +1215,6 @@ let tickets = [
     summary: 'Guest access',
     reporter: 'Darla DevDirector',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'IN PROGRESS',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1239,7 +1232,6 @@ let tickets = [
     summary: 'Add Office to Mac',
     reporter: 'Sammy ServiceDeskAgent',
     assignee: 'Serena ServiceDeskAgent',
-    assigneeInitials: 'SE',
     status: 'IN PROGRESS',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1257,7 +1249,6 @@ let tickets = [
     summary: 'Need new keyboard',
     reporter: 'Sandeep ServiceOwner',
     assignee: 'Serena ServiceDeskAgent',
-    assigneeInitials: 'SE',
     status: 'IN PROGRESS',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1275,7 +1266,6 @@ let tickets = [
     summary: 'VPN Access',
     reporter: 'Christy ChangeManager',
     assignee: 'Serena ServiceDeskAgent',
-    assigneeInitials: 'SE',
     status: 'IN PROGRESS',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1293,7 +1283,6 @@ let tickets = [
     summary: 'Need a new iPhone',
     reporter: 'Dante Developer',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'WAITING FOR APPROVAL',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1311,7 +1300,6 @@ let tickets = [
     summary: 'Investigate website slow response',
     reporter: 'Sammy ServiceDeskAgent',
     assignee: 'Sammy ServiceDeskAgent',
-    assigneeInitials: 'SS',
     status: 'UNDER REVIEW',
     created: '25/Sep/20',
     sla: '7h 44m',
@@ -1389,11 +1377,12 @@ function renderTicketList() {
   }
 
   if (filtered.length === 0) {
+    const isUnimplemented = currentFilter === 'none';
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📭</div>
-        <h3>No tickets in this view</h3>
-        <p>There are no tickets matching this filter right now.</p>
+        <h3>${isUnimplemented ? 'This section is not simulated in this lab.' : 'No tickets in this view'}</h3>
+        <p>${isUnimplemented ? 'Select a queue from the sidebar to view tickets.' : 'There are no tickets matching this filter right now.'}</p>
       </div>`;
     return;
   }
@@ -1404,7 +1393,7 @@ function renderTicketList() {
     const avaClass = assigneeAvatarClass(t.assignee);
     const slaClass = t.slaOverdue ? 'sla-overdue' : 'sla-ok';
     return `
-      <tr onclick="openTicketDetail('${escHtml(t.key)}')" id="row-${t.key}">
+      <tr data-key="${escHtml(t.key)}" id="row-${t.key}">
         <td class="col-checkbox"><span class="fake-checkbox"></span></td>
         <td class="col-reqtype">
           <div class="req-type-cell">
@@ -1414,7 +1403,7 @@ function renderTicketList() {
         </td>
         <td class="col-key"><span class="ticket-key">${escHtml(t.key)}</span></td>
         <td class="col-summary">
-          <a class="ticket-summary-link" href="#" onclick="event.preventDefault(); openTicketDetail('${escHtml(t.key)}')">${escHtml(t.summary)}</a>
+          <a class="ticket-summary-link" href="#" data-key="${escHtml(t.key)}">${escHtml(t.summary)}</a>
         </td>
         <td class="col-reporter">${escHtml(t.reporter)}</td>
         <td class="col-assignee">
@@ -1450,6 +1439,14 @@ function renderTicketList() {
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
+
+  // Delegated click listener: any click inside tbody that reaches a row with data-key opens that ticket
+  container.querySelector('tbody').addEventListener('click', function(e) {
+    // Prevent the summary link's default anchor navigation
+    if (e.target.tagName === 'A') e.preventDefault();
+    const row = e.target.closest('tr[data-key]');
+    if (row) openTicketDetail(row.dataset.key);
+  });
 }
 
 // ─── STATUS CELL UPDATE (in-place) ───────────────────────────
@@ -1471,7 +1468,7 @@ const filterTitles = {
   'service-request': 'Service requests',
   'problem':         'Problems',
   'change':          'Changes',
-  'none':            'No tickets in this view',
+  'none':            'Not simulated',
 };
 
 function setSidebarActive(el) {
@@ -1523,7 +1520,7 @@ function openTicketDetail(key) {
     <div class="detail-field">
       <div class="detail-field-label">Assignee</div>
       <div class="detail-field-value">
-        <select class="assignee-select" onchange="updateAssignee('${escHtml(key)}', this.value)">
+        <select class="assignee-select" id="detail-assignee-select">
           <option value="Sammy ServiceDeskAgent" ${t.assignee==='Sammy ServiceDeskAgent'?'selected':''}>Sammy ServiceDeskAgent</option>
           <option value="Serena ServiceDeskAgent" ${t.assignee==='Serena ServiceDeskAgent'?'selected':''}>Serena ServiceDeskAgent</option>
           <option value="Unassigned" ${t.assignee==='Unassigned'?'selected':''}>Unassigned</option>
@@ -1539,10 +1536,18 @@ function openTicketDetail(key) {
       <div class="detail-field-value ${t.slaOverdue ? 'sla-overdue' : 'sla-ok'}">${escHtml(t.sla)}</div>
     </div>`;
 
+  // Wire up assignee select via a proper event listener (key is in closure scope)
+  document.getElementById('detail-assignee-select').addEventListener('change', function() {
+    updateAssignee(key, this.value);
+  });
+
   document.getElementById('detail-description').textContent = t.description;
 
-  // Reset activity tab
-  switchActivityTab('log', document.querySelector('.activity-tab'));
+  // Reset activity tab — directly set active states by id/reliable query
+  document.querySelectorAll('.activity-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector('.activity-tab[data-tab="log"]').classList.add('active');
+  document.getElementById('activity-log').style.display = 'block';
+  document.getElementById('comment-form').classList.remove('visible');
 
   renderActivityLog(key);
 
@@ -1592,7 +1597,6 @@ function updateAssignee(key, newAssignee) {
   const t = ticketByKey(key);
   if (!t) return;
   t.assignee = newAssignee;
-  t.assigneeInitials = avatarInitials(newAssignee);
   // Re-render just the assignee cell in the table row
   const row = document.getElementById('row-' + key);
   if (row) {
@@ -1728,7 +1732,6 @@ function submitCreateForm() {
     summary,
     reporter: 'You',
     assignee,
-    assigneeInitials: avatarInitials(assignee),
     status: 'WAITING FOR SUPPORT',
     created: createdStr,
     sla: '8h 0m',
