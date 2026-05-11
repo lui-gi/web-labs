@@ -93,7 +93,8 @@ In the simulation you will see these states:
 - **UNDER REVIEW** — a solution has been proposed and is being verified.
 - **WAITING FOR APPROVAL** — the resolution requires sign-off (common for Changes).
 - **Resolved / Closed** — the issue is fixed and the user has confirmed it (or a timeout
-  has passed).
+  has passed). (Note: the simulation does not include a Resolved or Closed state — those
+  appear in a real JSM instance after the customer confirms the issue is fixed.)
 
 **SLA (Service Level Agreement)** is a time-bound commitment between the IT team and
 the business. A common SLA: "P2 Incidents will receive a first response within 4 hours
@@ -168,7 +169,7 @@ P3 SLA times in standup so a teammate can pick them up.
 **Task:**
 Without interacting with the simulation, answer the following in writing (in `notes.md`
 or on paper):
-1. List the 4 main navigation sections visible in the left sidebar.
+1. What are the three labeled section headers that appear in the sidebar below the queue filters?
 2. Name and describe what each of the column headers in the ticket table represents.
 3. What does the red `-15m` badge on ticket ITSM-1324 mean?
 
@@ -177,7 +178,7 @@ or on paper):
 <details>
 <summary>What you should see (expand after attempting)</summary>
 
-1. **Left sidebar sections:** Queues, Operations, Knowledge & Insights, Channels & People.
+1. **Left sidebar section headers:** OPERATIONS, KNOWLEDGE & INSIGHTS, CHANNELS & PEOPLE.
 
 2. **Table columns:**
    - Checkbox — for bulk-selecting tickets
@@ -213,8 +214,8 @@ Answer the following in writing:
 1. What is this ticket's type?
 2. What is its priority?
 3. What is the difference between the Reporter and the Assignee?
-4. How would you tell the difference between a public customer reply and an internal
-   note if this ticket had comments?
+4. Scroll to the Activity section. You will see an existing internal note. How can you
+   tell it is an internal note and not a public reply to the customer?
 
 **Success condition:** All four answers correct per the hints.
 
@@ -228,10 +229,10 @@ Answer the following in writing:
    problem. **Assignee** = the IT staff member who owns and is responsible for resolving
    it. These are different people. Confusing them (e.g., emailing the reporter when you
    mean to update the assignee) is a common new-agent mistake.
-4. **Internal notes** have a yellow background — they are only visible to the IT team,
-   not the customer. Public comments are visible to the reporter. If you accidentally
-   post an internal note as a public comment, the customer sees your internal
-   troubleshooting discussion.
+4. **Internal notes** have a yellow background and an orange "Internal note" badge — they
+   are only visible to the IT team, not the customer. Public comments have a plain white
+   background. If you accidentally post an internal note as a public comment, the customer
+   sees your internal troubleshooting discussion.
 
 </details>
 
@@ -249,15 +250,15 @@ the queue — it is currently WAITING FOR SUPPORT with a breached SLA (red `-15m
 
 **Task:**
 1. Click ITSM-1324 to open its detail panel.
-2. Change the **Assignee** to "Sammy ServiceDeskAgent".
+2. In the **Assignee** dropdown, assign the ticket to "Sammy ServiceDeskAgent".
 3. Change the **Status** to "In Progress".
-4. In the **Add a comment** area, click "Add internal note" and type:
+4. Click the **Add a comment** tab to open the comment form. Then click **Add internal note** and type:
    `Investigating — contacted user to confirm access scope.`
    Then submit the note.
 
 **Success condition:** The ticket shows status "IN PROGRESS" in both the detail panel
 and the ticket table row. The internal note appears in the Activity log with a yellow
-background. The Assignee field shows "Sammy ServiceDeskAgent".
+background. The Assignee field shows "Sammy ServiceDeskAgent" (it started as Unassigned).
 
 **Why this matters:** This is the exact sequence you will run every morning at standup:
 scan the queue for breached SLAs, assign to the right agent, move to In Progress, log
@@ -377,6 +378,6 @@ is how the right work reaches the right people with the right urgency.
 
 ## Going Deeper
 
-- [Atlassian: What is Jira Service Management?](https://www.atlassian.com/software/jira/service-management/guides): Official overview including how JSM differs from Jira Software (for dev teams) — worth reading to understand why IT ops and engineering use different Jira products.
+- [Atlassian: What is Jira Service Management?](https://www.atlassian.com/software/jira/service-management): Official overview including how JSM differs from Jira Software (for dev teams) — worth reading to understand why IT ops and engineering use different Jira products.
 - [ITIL 4 Foundation overview (AXELOS)](https://www.axelos.com/certifications/itil-service-management/itil-4-foundation): The framework that defines Incident, Problem, Change, and Service Request at a process level — understanding ITIL makes JSM's structure make sense rather than feel arbitrary; the Foundation certification is the standard entry-level IT ops credential.
-- [Atlassian: SLA in Jira Service Management](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-slas/): How SLA timers are configured, what "breached" means in a real org, and how to read SLA compliance reports — essential reading before your first monthly IT ops review.
+- [Atlassian: SLA in Jira Service Management](https://support.atlassian.com/jira-service-management-cloud/docs/): Atlassian JSM Cloud documentation — browse to 'SLAs' for configuration guides; the root index lists all available help articles. Covers how SLA timers are configured, what "breached" means in a real org, and how to read SLA compliance reports — essential reading before your first monthly IT ops review.

@@ -1112,7 +1112,7 @@ let tickets = [
     type: 'service-request',
     summary: 'Admin access to Jira',
     reporter: 'Polly ProductManager',
-    assignee: 'Sammy ServiceDeskAgent',
+    assignee: 'Unassigned',
     status: 'WAITING FOR SUPPORT',
     created: '24/Sep/20',
     sla: '-15m',
@@ -1137,7 +1137,14 @@ let tickets = [
     priority: 'P2',
     priorityIcon: '↑',
     description: 'The Banc.ly banking integration is responding slowly — page loads taking 8–12 seconds. Affects all users on the finance floor. Started around 09:00 this morning after overnight maintenance.',
-    comments: [],
+    comments: [
+      {
+        author: 'Sammy ServiceDeskAgent',
+        text: 'Checked with the networking team — no infrastructure changes were scheduled last night. Investigating application logs next.',
+        isInternal: true,
+        timestamp: '25/Sep/20 09:47',
+      },
+    ],
   },
   {
     key: 'ITSM-1339',
@@ -1340,7 +1347,7 @@ function assigneeAvatarClass(name) {
 }
 
 function avatarInitials(name) {
-  if (!name || name === 'Unassigned') return '?';
+  if (!name || name === 'Unassigned') return '—';
   const parts = name.trim().split(' ');
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return name.slice(0, 2).toUpperCase();
@@ -1637,15 +1644,18 @@ function renderActivityLog(key) {
     logDiv.innerHTML = '<p class="no-activity">No activity yet.</p>';
     return;
   }
-  logDiv.innerHTML = t.comments.map(c => `
-    <div class="activity-item ${c.internal ? 'internal' : ''}">
+  logDiv.innerHTML = t.comments.map(c => {
+    const isInternal = c.internal || c.isInternal;
+    return `
+    <div class="activity-item ${isInternal ? 'internal' : ''}">
       <div class="activity-meta">
         <strong>${escHtml(c.author)}</strong>
-        ${c.internal ? '<span class="activity-note-badge">Internal note</span>' : ''}
-        &nbsp;·&nbsp; ${escHtml(c.timestamp)}
+        ${isInternal ? '<span class="activity-note-badge">Internal note</span>' : ''}
+        &nbsp;·&nbsp; ${escHtml(String(c.timestamp))}
       </div>
       <div class="activity-text">${escHtml(c.text)}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function submitComment(isInternal) {
