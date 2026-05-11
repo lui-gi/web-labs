@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITSM Service Desk – Jira Service Management</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #172b4d;
+      background: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ─── TOP NAV ─────────────────────────────────────────── */
+    #top-nav {
+      background: #0052cc;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 4px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-right: 12px;
+      text-decoration: none;
+    }
+
+    .nav-grid-icon {
+      display: grid;
+      grid-template-columns: repeat(3, 5px);
+      grid-template-rows: repeat(3, 5px);
+      gap: 2px;
+    }
+
+    .nav-grid-icon span {
+      width: 5px;
+      height: 5px;
+      background: #fff;
+      border-radius: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      background: none;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-link.active { color: #fff; background: rgba(255,255,255,0.15); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .nav-search {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      padding: 4px 10px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      width: 180px;
+      outline: none;
+    }
+
+    .nav-search::placeholder { color: rgba(255,255,255,0.6); }
+
+    .nav-icon-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 15px;
+      transition: background 0.15s;
+    }
+
+    .nav-icon-btn:hover { background: rgba(255,255,255,0.15); }
+
+    .nav-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ff991f;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .btn-create {
+      background: #fff;
+      color: #0052cc;
+      border: none;
+      padding: 5px 14px;
+      border-radius: 3px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .btn-create:hover { background: #e8f0fe; }
+
+    /* ─── BODY LAYOUT ─────────────────────────────────────── */
+    #body-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────── */
+    #sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: #f4f5f7;
+      border-right: 1px solid #dfe1e6;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-project {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #dfe1e6;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .project-icon {
+      width: 34px;
+      height: 34px;
+      background: #0052cc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .project-info strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #172b4d;
+      line-height: 1.3;
+    }
+
+    .project-info small {
+      font-size: 11px;
+      color: #5e6c84;
+    }
+
+    .sidebar-nav { padding: 8px 0; }
+
+    .sidebar-section-label {
+      padding: 12px 16px 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5e6c84;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      cursor: pointer;
+      color: #172b4d;
+      font-size: 13.5px;
+      border-left: 3px solid transparent;
+      transition: background 0.12s;
+      user-select: none;
+    }
+
+    .sidebar-item:hover {
+      background: #ebecf0;
+    }
+
+    .sidebar-item.active {
+      background: #deebff;
+      border-left-color: #0052cc;
+      color: #0052cc;
+      font-weight: 600;
+    }
+
+    .sidebar-item .icon { font-size: 14px; width: 18px; text-align: center; }
+
+    /* ─── MAIN CONTENT ────────────────────────────────────── */
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #queue-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .breadcrumb {
+      font-size: 12px;
+      color: #5e6c84;
+      margin-bottom: 12px;
+    }
+
+    .breadcrumb span { margin: 0 4px; }
+
+    .queue-title-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 8px;
+    }
+
+    .queue-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #172b4d;
+      flex: 1;
+    }
+
+    .queue-title-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #5e6c84;
+      font-size: 16px;
+    }
+
+    .title-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #5e6c84;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 3px;
+      transition: background 0.12s;
+    }
+
+    .title-action-btn:hover { background: #f4f5f7; }
+
+    /* ─── TICKET TABLE ────────────────────────────────────── */
+    .ticket-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .ticket-table thead tr {
+      background: #f4f5f7;
+      border-bottom: 2px solid #dfe1e6;
+    }
+
+    .ticket-table th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #5e6c84;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ticket-table th:hover { color: #172b4d; }
+
+    .ticket-table th .sort-arrow {
+      display: inline-block;
+      margin-left: 3px;
+      color: #b3bac5;
+      font-size: 10px;
+    }
+
+    .ticket-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #dfe1e6;
+      vertical-align: middle;
+    }
+
+    .ticket-table tbody tr {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .ticket-table tbody tr:hover { background: #f4f5f7; }
+
+    .col-checkbox { width: 32px; }
+    .col-reqtype { width: 140px; }
+    .col-key { width: 90px; }
+    .col-summary { }
+    .col-reporter { width: 130px; }
+    .col-assignee { width: 130px; }
+    .col-status { width: 150px; }
+    .col-created { width: 90px; }
+    .col-sla { width: 90px; }
+    .col-priority { width: 36px; text-align: center; }
+
+    .fake-checkbox {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #dfe1e6;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .req-type-cell {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #5e6c84;
+    }
+
+    .req-type-icon { font-size: 13px; }
+
+    .ticket-key {
+      font-size: 12px;
+      color: #5e6c84;
+      font-family: monospace;
+    }
+
+    .ticket-summary-link {
+      color: #0052cc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .ticket-summary-link:hover { text-decoration: underline; }
+
+    .assignee-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .assignee-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #6554c0;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .assignee-avatar.serena { background: #36b37e; }
+    .assignee-avatar.unassigned { background: #b3bac5; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-waiting-support  { background: #ffebe6; color: #bf2600; border: 1px solid #ff5630; }
+    .status-work-in-progress { background: #deebff; color: #0747a6; border: 1px solid #0052cc; }
+    .status-in-progress      { background: #e3fcef; color: #006644; border: 1px solid #36b37e; }
+    .status-waiting-approval { background: #fffae6; color: #974f0c; border: 1px solid #ff991f; }
+    .status-under-review     { background: #f4f5f7; color: #42526e; border: 1px solid #6b778c; }
+
+    .sla-overdue { color: #bf2600; font-weight: 600; }
+    .sla-ok      { color: #006644; }
+
+    .priority-icon { font-weight: 700; font-size: 13px; }
+    .p1 { color: #de350b; }
+    .p2 { color: #ff991f; }
+    .p3 { color: #0065ff; }
+    .p4 { color: #97a0af; }
+
+    /* ─── EMPTY STATE ─────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5e6c84;
+    }
+
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; margin-bottom: 6px; color: #172b4d; }
+    .empty-state p { font-size: 13px; }
+
+    /* ─── DETAIL PANEL ────────────────────────────────────── */
+    #detail-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 30, 66, 0.3);
+      z-index: 200;
+      display: none;
+    }
+
+    #detail-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 52%;
+      height: 100%;
+      background: #fff;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+    }
+
+    #detail-panel.open { transform: translateX(0); }
+
+    .detail-header {
+      background: #0052cc;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .detail-header-info { flex: 1; min-width: 0; }
+
+    .detail-key {
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 2px;
+      font-family: monospace;
+    }
+
+    .detail-summary {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .detail-close {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.8);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 3px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+
+    .detail-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    .detail-status-bar {
+      padding: 10px 16px;
+      border-bottom: 1px solid #dfe1e6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #fafbfc;
+    }
+
+    .detail-status-label { font-size: 12px; color: #5e6c84; font-weight: 600; }
+
+    .detail-status-select {
+      border: 1px solid #dfe1e6;
+      background: #fff;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #172b4d;
+      outline: none;
+    }
+
+    .detail-status-select:focus { border-color: #0052cc; }
+
+    .detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .detail-fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .detail-field {
+      padding: 10px 12px;
+      border-bottom: 1px solid #dfe1e6;
+    }
+
+    .detail-field:nth-last-child(-n+2) { border-bottom: none; }
+
+    .detail-field-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #5e6c84;
+      margin-bottom: 4px;
+    }
+
+    .detail-field-value {
+      font-size: 13px;
+      color: #172b4d;
+    }
+
+    .assignee-select {
+      border: 1px solid #dfe1e6;
+      background: #fff;
+      border-radius: 3px;
+      padding: 3px 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #172b4d;
+      outline: none;
+      width: 100%;
+    }
+
+    .assignee-select:focus { border-color: #0052cc; }
+
+    .detail-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #172b4d;
+      margin-bottom: 8px;
+    }
+
+    .detail-description {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #172b4d;
+      margin-bottom: 20px;
+      padding: 10px 12px;
+      background: #fafbfc;
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+    }
+
+    /* ─── ACTIVITY ────────────────────────────────────────── */
+    .activity-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #dfe1e6;
+      margin-bottom: 12px;
+    }
+
+    .activity-tab {
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #5e6c84;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.12s;
+    }
+
+    .activity-tab:hover { color: #172b4d; }
+
+    .activity-tab.active {
+      color: #0052cc;
+      border-bottom-color: #0052cc;
+      font-weight: 600;
+    }
+
+    .activity-log { margin-bottom: 10px; }
+
+    .activity-item {
+      padding: 8px 10px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+      background: #fafbfc;
+      border: 1px solid #dfe1e6;
+    }
+
+    .activity-item.internal {
+      background: #fffae6;
+      border-color: #ff991f;
+    }
+
+    .activity-meta {
+      font-size: 11px;
+      color: #5e6c84;
+      margin-bottom: 3px;
+    }
+
+    .activity-meta strong { color: #172b4d; }
+
+    .activity-text { font-size: 13px; color: #172b4d; line-height: 1.5; }
+
+    .activity-note-badge {
+      display: inline-block;
+      background: #ff991f;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      margin-left: 4px;
+    }
+
+    .no-activity {
+      font-size: 13px;
+      color: #5e6c84;
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    .comment-form { display: none; }
+    .comment-form.visible { display: block; }
+
+    .comment-textarea {
+      width: 100%;
+      min-height: 80px;
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      color: #172b4d;
+      margin-bottom: 8px;
+    }
+
+    .comment-textarea:focus { border-color: #0052cc; }
+
+    .comment-actions { display: flex; gap: 8px; }
+
+    .btn-reply {
+      background: #0052cc;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 3px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.12s;
+    }
+
+    .btn-reply:hover { background: #0747a6; }
+
+    .btn-internal {
+      background: #fffae6;
+      color: #974f0c;
+      border: 1px solid #ff991f;
+      padding: 6px 14px;
+      border-radius: 3px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.12s;
+    }
+
+    .btn-internal:hover { background: #fff0b3; }
+
+    /* ─── CREATE MODAL ────────────────────────────────────── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 30, 66, 0.54);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #modal-overlay.visible { display: flex; }
+
+    #create-modal {
+      background: #fff;
+      border-radius: 4px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(9, 30, 66, 0.35);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #dfe1e6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #172b4d;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #5e6c84;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 3px;
+      line-height: 1;
+      transition: background 0.12s;
+    }
+
+    .modal-close:hover { background: #f4f5f7; }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .form-field { margin-bottom: 16px; }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #172b4d;
+      margin-bottom: 5px;
+    }
+
+    .form-label .required { color: #de350b; margin-left: 2px; }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      border: 2px solid #dfe1e6;
+      border-radius: 3px;
+      padding: 7px 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #172b4d;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: #0052cc;
+    }
+
+    .form-input.error { border-color: #de350b; }
+
+    .form-textarea { min-height: 90px; resize: vertical; }
+
+    .form-error {
+      font-size: 12px;
+      color: #de350b;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .form-error.visible { display: block; }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid #dfe1e6;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-cancel {
+      background: #f4f5f7;
+      color: #172b4d;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.12s;
+    }
+
+    .btn-cancel:hover { background: #dfe1e6; }
+
+    .btn-primary {
+      background: #0052cc;
+      color: #fff;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.12s;
+    }
+
+    .btn-primary:hover { background: #0747a6; }
+
+    /* ─── SCROLLBAR ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #dfe1e6; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #b3bac5; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  TOP NAV                                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<nav id="top-nav">
+  <a class="nav-brand" href="#" onclick="return false;">
+    <div class="nav-grid-icon">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+    Jira Service Management
+  </a>
+
+  <div class="nav-links">
+    <button class="nav-link">Your work ▾</button>
+    <button class="nav-link active">Projects ▾</button>
+    <button class="nav-link">Filters ▾</button>
+    <button class="nav-link">Dashboards ▾</button>
+    <button class="nav-link">People ▾</button>
+    <button class="nav-link">Plans ▾</button>
+    <button class="nav-link">Apps ▾</button>
+  </div>
+
+  <div class="nav-right">
+    <input class="nav-search" type="text" placeholder="🔍  Search">
+    <button class="nav-icon-btn" title="Notifications">🔔</button>
+    <button class="nav-icon-btn" title="Help">?</button>
+    <button class="nav-icon-btn" title="Settings">⚙</button>
+    <div class="nav-avatar" title="Your profile">YO</div>
+    <button class="btn-create" onclick="openCreateModal()">+ Create</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  BODY LAYOUT                                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="body-layout">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-project">
+      <div class="project-icon">🛠</div>
+      <div class="project-info">
+        <strong>ITSM Service Desk</strong>
+        <small>Service project</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-item active" data-filter="all" onclick="setSidebarActive(this)">
+        <span class="icon">📋</span> Queues
+      </div>
+      <div class="sidebar-item" data-filter="service-request" onclick="setSidebarActive(this)">
+        <span class="icon">📨</span> Service requests
+      </div>
+      <div class="sidebar-item" data-filter="incident" onclick="setSidebarActive(this)">
+        <span class="icon">🔴</span> Incidents
+      </div>
+      <div class="sidebar-item" data-filter="problem" onclick="setSidebarActive(this)">
+        <span class="icon">⚠️</span> Problems
+      </div>
+      <div class="sidebar-item" data-filter="change" onclick="setSidebarActive(this)">
+        <span class="icon">🔄</span> Changes
+      </div>
+
+      <div class="sidebar-section-label">Operations</div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">🔧</span> Services
+      </div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">🔔</span> Alerts
+      </div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">📞</span> On-call
+      </div>
+
+      <div class="sidebar-section-label">Knowledge &amp; Insights</div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">📚</span> Knowledge base
+      </div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">📊</span> Reports
+      </div>
+
+      <div class="sidebar-section-label">Channels &amp; People</div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">💬</span> Ticket channels
+      </div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">👥</span> Customers
+      </div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">➕</span> Invite team
+      </div>
+
+      <div style="height: 12px;"></div>
+      <div class="sidebar-item" data-filter="none" onclick="setSidebarActive(this)">
+        <span class="icon">⚙️</span> Project settings
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="main-content">
+    <div id="queue-area">
+      <div class="breadcrumb">
+        Projects <span>›</span> ITSM Service Desk <span>›</span> All tickets
+      </div>
+
+      <div class="queue-title-bar">
+        <h1 class="queue-title" id="queue-title">All open tickets</h1>
+        <div class="queue-title-actions">
+          <button class="title-action-btn" title="Star">☆</button>
+          <button class="title-action-btn" title="More">•••</button>
+        </div>
+      </div>
+
+      <div id="ticket-list-container"></div>
+    </div>
+
+    <!-- DETAIL OVERLAY (scoped to main-content) -->
+    <div id="detail-overlay" onclick="handleOverlayClick(event)">
+      <div id="detail-panel">
+        <div class="detail-header">
+          <div class="detail-header-info">
+            <div class="detail-key" id="detail-key"></div>
+            <div class="detail-summary" id="detail-summary"></div>
+          </div>
+          <button class="detail-close" onclick="closeTicketDetail()">×</button>
+        </div>
+
+        <div class="detail-status-bar">
+          <span class="detail-status-label">Status:</span>
+          <span id="detail-status-badge"></span>
+          <select class="detail-status-select" id="detail-status-select" onchange="changeDetailStatus(this.value)">
+            <option value="WAITING FOR SUPPORT">Waiting for Support</option>
+            <option value="WORK IN PROGRESS">Work in Progress</option>
+            <option value="IN PROGRESS">In Progress</option>
+            <option value="WAITING FOR APPROVAL">Waiting for Approval</option>
+            <option value="UNDER REVIEW">Under Review</option>
+          </select>
+        </div>
+
+        <div class="detail-body">
+          <div class="detail-fields-grid" id="detail-fields"></div>
+
+          <div class="detail-section-title">Description</div>
+          <div class="detail-description" id="detail-description"></div>
+
+          <div class="detail-section-title">Activity</div>
+          <div class="activity-tabs">
+            <div class="activity-tab active" onclick="switchActivityTab('log', this)">Activity</div>
+            <div class="activity-tab" onclick="switchActivityTab('comment', this)">Add a comment</div>
+          </div>
+
+          <div id="activity-log" class="activity-log"></div>
+
+          <div id="comment-form" class="comment-form">
+            <textarea class="comment-textarea" id="comment-text" placeholder="Write a comment..."></textarea>
+            <div class="comment-actions">
+              <button class="btn-reply" onclick="submitComment(false)">Reply to customer</button>
+              <button class="btn-internal" onclick="submitComment(true)">Add internal note</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div><!-- /#body-layout -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  CREATE MODAL                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="modal-overlay" onclick="handleModalOverlayClick(event)">
+  <div id="create-modal">
+    <div class="modal-header">
+      <span class="modal-title">Create issue</span>
+      <button class="modal-close" onclick="closeCreateModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label">Issue type</label>
+        <select class="form-select" id="form-type">
+          <option value="incident">🔴 Incident</option>
+          <option value="service-request">📨 Service Request</option>
+          <option value="problem">⚠️ Problem</option>
+          <option value="change">🔄 Change</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Summary <span class="required">*</span></label>
+        <input class="form-input" id="form-summary" type="text" placeholder="Summary">
+        <div class="form-error" id="form-summary-error">Summary is required.</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="form-description" placeholder="Add a description..."></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Priority</label>
+        <select class="form-select" id="form-priority">
+          <option value="P1">P1 Critical</option>
+          <option value="P2">P2 High</option>
+          <option value="P3" selected>P3 Medium</option>
+          <option value="P4">P4 Low</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Assignee</label>
+        <select class="form-select" id="form-assignee">
+          <option value="Sammy ServiceDeskAgent">Sammy ServiceDeskAgent</option>
+          <option value="Serena ServiceDeskAgent">Serena ServiceDeskAgent</option>
+          <option value="Unassigned">Unassigned</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitCreateForm()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── DATA ────────────────────────────────────────────────────
+let tickets = [
+  {
+    key: 'ITSM-1324',
+    requestType: 'Request admin access',
+    requestTypeIcon: '⬆',
+    type: 'service-request',
+    summary: 'Admin access to Jira',
+    reporter: 'Polly ProductManager',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'WAITING FOR SUPPORT',
+    created: '24/Sep/20',
+    sla: '-15m',
+    slaOverdue: true,
+    priority: 'P2',
+    priorityIcon: '↑',
+    description: 'Polly needs admin access to the Jira instance to manage user permissions for the product team. She has been waiting two weeks and this is blocking onboarding of three new contractors.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1342',
+    requestType: 'Report a system problem',
+    requestTypeIcon: '⚠',
+    type: 'incident',
+    summary: 'Banc.ly Inc is slow',
+    reporter: 'Serena ServiceDeskManager',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'WORK IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '3h 44m',
+    slaOverdue: false,
+    priority: 'P2',
+    priorityIcon: '↑',
+    description: 'The Banc.ly banking integration is responding slowly — page loads taking 8–12 seconds. Affects all users on the finance floor. Started around 09:00 this morning after overnight maintenance.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1339',
+    requestType: 'Report a system problem',
+    requestTypeIcon: '⚠',
+    type: 'incident',
+    summary: "Can't access POS System",
+    reporter: 'Sammy ServiceDeskAgent',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'WORK IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '3h 44m',
+    slaOverdue: false,
+    priority: 'P1',
+    priorityIcon: '↑↑',
+    description: 'The point-of-sale terminals on floors 2 and 3 cannot connect to the POS backend. Sales staff are unable to process transactions. This is a P1 — revenue impact.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1333',
+    requestType: 'Report broken hardware',
+    requestTypeIcon: '🖥',
+    type: 'incident',
+    summary: 'Cant access webcam',
+    reporter: 'Darrel DevManager',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'WORK IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '3h 44m',
+    slaOverdue: false,
+    priority: 'P3',
+    priorityIcon: '→',
+    description: "Darrel's built-in webcam is not being detected by Windows or any video conferencing apps. He has important external calls this week and needs this resolved urgently.",
+    comments: [],
+  },
+  {
+    key: 'ITSM-1331',
+    requestType: 'Report a system problem',
+    requestTypeIcon: '⚠',
+    type: 'incident',
+    summary: "Can't access Trello",
+    reporter: 'Sammy ServiceDeskAgent',
+    assignee: 'Serena ServiceDeskAgent',
+    assigneeInitials: 'SE',
+    status: 'WORK IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '3h 44m',
+    slaOverdue: false,
+    priority: 'P3',
+    priorityIcon: '→',
+    description: 'Trello is returning a 403 Forbidden error for all users in the marketing department. Other departments are unaffected. Possibly a license or SSO configuration issue.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1338',
+    requestType: 'Request admin access',
+    requestTypeIcon: '⬆',
+    type: 'service-request',
+    summary: 'Admin access to Jira',
+    reporter: 'Polly ProductManager',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P2',
+    priorityIcon: '↑',
+    description: 'Follow-up admin access request. Previous ticket ITSM-1324 was escalated. This duplicate was opened in error by the reporter.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1337',
+    requestType: 'Get a guest wifi account',
+    requestTypeIcon: '📶',
+    type: 'service-request',
+    summary: 'Guest access',
+    reporter: 'Darla DevDirector',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P4',
+    priorityIcon: '↓',
+    description: 'Darla needs a guest WiFi account for three external consultants visiting the office on Thursday and Friday this week.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1336',
+    requestType: 'Request new software',
+    requestTypeIcon: '💾',
+    type: 'service-request',
+    summary: 'Add Office to Mac',
+    reporter: 'Sammy ServiceDeskAgent',
+    assignee: 'Serena ServiceDeskAgent',
+    assigneeInitials: 'SE',
+    status: 'IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P3',
+    priorityIcon: '→',
+    description: 'Microsoft Office needs to be installed on a new MacBook Pro issued to a developer. The machine currently only has the standard macOS apps.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1335',
+    requestType: 'Request new hardware',
+    requestTypeIcon: '⌨',
+    type: 'service-request',
+    summary: 'Need new keyboard',
+    reporter: 'Sandeep ServiceOwner',
+    assignee: 'Serena ServiceDeskAgent',
+    assigneeInitials: 'SE',
+    status: 'IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P4',
+    priorityIcon: '↓',
+    description: "Sandeep's keyboard has several keys that are sticking. He is requesting a replacement mechanical keyboard. Preferred: same model as last time (Dell KB216).",
+    comments: [],
+  },
+  {
+    key: 'ITSM-1334',
+    requestType: 'Set up VPN to the office',
+    requestTypeIcon: '🔒',
+    type: 'change',
+    summary: 'VPN Access',
+    reporter: 'Christy ChangeManager',
+    assignee: 'Serena ServiceDeskAgent',
+    assigneeInitials: 'SE',
+    status: 'IN PROGRESS',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P2',
+    priorityIcon: '↑',
+    description: 'Christy needs VPN access configured for remote work. She will be working from home three days per week starting next month and needs both split-tunnel and full-tunnel options enabled.',
+    comments: [],
+  },
+  {
+    key: 'ITSM-1332',
+    requestType: 'New mobile device',
+    requestTypeIcon: '📱',
+    type: 'service-request',
+    summary: 'Need a new iPhone',
+    reporter: 'Dante Developer',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'WAITING FOR APPROVAL',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P3',
+    priorityIcon: '→',
+    description: "Dante's company iPhone 11 has a cracked screen and the battery drains in under 3 hours. Requesting upgrade to iPhone 14. Requires manager approval per hardware refresh policy.",
+    comments: [],
+  },
+  {
+    key: 'ITSM-1343',
+    requestType: 'Investigate a problem',
+    requestTypeIcon: '🔍',
+    type: 'problem',
+    summary: 'Investigate website slow response',
+    reporter: 'Sammy ServiceDeskAgent',
+    assignee: 'Sammy ServiceDeskAgent',
+    assigneeInitials: 'SS',
+    status: 'UNDER REVIEW',
+    created: '25/Sep/20',
+    sla: '7h 44m',
+    slaOverdue: false,
+    priority: 'P2',
+    priorityIcon: '↑',
+    description: 'Multiple incidents this week reported slow website response times during peak hours (09:00–11:00). This problem ticket is tracking the root cause investigation across incidents ITSM-1331, ITSM-1342.',
+    comments: [],
+  },
+];
+
+let currentFilter = 'all';
+let currentDetailKey = null;
+let nextKey = 1344;
+
+// ─── HELPERS ─────────────────────────────────────────────────
+
+function statusClass(status) {
+  const map = {
+    'WAITING FOR SUPPORT':  'status-waiting-support',
+    'WORK IN PROGRESS':     'status-work-in-progress',
+    'IN PROGRESS':          'status-in-progress',
+    'WAITING FOR APPROVAL': 'status-waiting-approval',
+    'UNDER REVIEW':         'status-under-review',
+  };
+  return map[status] || 'status-under-review';
+}
+
+function priorityClass(p) {
+  const map = { P1: 'p1', P2: 'p2', P3: 'p3', P4: 'p4' };
+  return map[p] || 'p3';
+}
+
+function assigneeAvatarClass(name) {
+  if (!name || name === 'Unassigned') return 'unassigned';
+  if (name.toLowerCase().startsWith('serena')) return 'serena';
+  return '';
+}
+
+function avatarInitials(name) {
+  if (!name || name === 'Unassigned') return '?';
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function formatNow() {
+  const d = new Date();
+  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' })
+    + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+
+function ticketByKey(key) {
+  return tickets.find(t => t.key === key);
+}
+
+// ─── RENDER TICKET LIST ───────────────────────────────────────
+
+function renderTicketList() {
+  const container = document.getElementById('ticket-list-container');
+
+  let filtered;
+  if (currentFilter === 'all') {
+    filtered = tickets;
+  } else if (currentFilter === 'none') {
+    filtered = [];
+  } else {
+    filtered = tickets.filter(t => t.type === currentFilter);
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No tickets in this view</h3>
+        <p>There are no tickets matching this filter right now.</p>
+      </div>`;
+    return;
+  }
+
+  let rows = filtered.map(t => {
+    const statusCls = statusClass(t.status);
+    const priCls = priorityClass(t.priority);
+    const avaClass = assigneeAvatarClass(t.assignee);
+    const slaClass = t.slaOverdue ? 'sla-overdue' : 'sla-ok';
+    return `
+      <tr onclick="openTicketDetail('${escHtml(t.key)}')" id="row-${t.key}">
+        <td class="col-checkbox"><span class="fake-checkbox"></span></td>
+        <td class="col-reqtype">
+          <div class="req-type-cell">
+            <span class="req-type-icon">${escHtml(t.requestTypeIcon)}</span>
+            <span>${escHtml(t.requestType)}</span>
+          </div>
+        </td>
+        <td class="col-key"><span class="ticket-key">${escHtml(t.key)}</span></td>
+        <td class="col-summary">
+          <a class="ticket-summary-link" href="#" onclick="event.preventDefault(); openTicketDetail('${escHtml(t.key)}')">${escHtml(t.summary)}</a>
+        </td>
+        <td class="col-reporter">${escHtml(t.reporter)}</td>
+        <td class="col-assignee">
+          <div class="assignee-cell">
+            <div class="assignee-avatar ${avaClass}">${escHtml(avatarInitials(t.assignee))}</div>
+            <span>${escHtml(t.assignee)}</span>
+          </div>
+        </td>
+        <td class="col-status" id="status-cell-${t.key}">
+          <span class="status-badge ${statusCls}">${escHtml(t.status)}</span>
+        </td>
+        <td class="col-created">${escHtml(t.created)}</td>
+        <td class="col-sla"><span class="${slaClass}">${escHtml(t.sla)}</span></td>
+        <td class="col-priority"><span class="priority-icon ${priCls}">${escHtml(t.priorityIcon)}</span></td>
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <table class="ticket-table">
+      <thead>
+        <tr>
+          <th class="col-checkbox"></th>
+          <th class="col-reqtype">Request Type <span class="sort-arrow">⇅</span></th>
+          <th class="col-key">Key <span class="sort-arrow">⇅</span></th>
+          <th class="col-summary">Summary <span class="sort-arrow">⇅</span></th>
+          <th class="col-reporter">Reporter <span class="sort-arrow">⇅</span></th>
+          <th class="col-assignee">Assignee <span class="sort-arrow">⇅</span></th>
+          <th class="col-status">Status <span class="sort-arrow">⇅</span></th>
+          <th class="col-created">Created <span class="sort-arrow">⇅</span></th>
+          <th class="col-sla">Time to resolu... <span class="sort-arrow">⇅</span></th>
+          <th class="col-priority">P <span class="sort-arrow">⇅</span></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ─── STATUS CELL UPDATE (in-place) ───────────────────────────
+
+function updateStatusCell(key) {
+  const t = ticketByKey(key);
+  if (!t) return;
+  const cell = document.getElementById('status-cell-' + key);
+  if (cell) {
+    cell.innerHTML = `<span class="status-badge ${statusClass(t.status)}">${escHtml(t.status)}</span>`;
+  }
+}
+
+// ─── SIDEBAR ─────────────────────────────────────────────────
+
+const filterTitles = {
+  'all':             'All open tickets',
+  'incident':        'Incidents',
+  'service-request': 'Service requests',
+  'problem':         'Problems',
+  'change':          'Changes',
+  'none':            'No tickets in this view',
+};
+
+function setSidebarActive(el) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = el.dataset.filter;
+  document.getElementById('queue-title').textContent = filterTitles[currentFilter] || 'Tickets';
+  renderTicketList();
+}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────
+
+function openTicketDetail(key) {
+  const t = ticketByKey(key);
+  if (!t) return;
+  currentDetailKey = key;
+
+  document.getElementById('detail-key').textContent = t.key;
+  document.getElementById('detail-summary').textContent = t.summary;
+
+  // Status badge + select
+  const badge = document.getElementById('detail-status-badge');
+  badge.className = 'status-badge ' + statusClass(t.status);
+  badge.textContent = t.status;
+
+  const sel = document.getElementById('detail-status-select');
+  sel.value = t.status;
+
+  // Fields grid
+  const priCls = priorityClass(t.priority);
+  const avaClass = assigneeAvatarClass(t.assignee);
+
+  document.getElementById('detail-fields').innerHTML = `
+    <div class="detail-field">
+      <div class="detail-field-label">Request Type</div>
+      <div class="detail-field-value">${escHtml(t.requestTypeIcon)} ${escHtml(t.requestType)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Priority</div>
+      <div class="detail-field-value">
+        <span class="priority-icon ${priCls}">${escHtml(t.priorityIcon)}</span>
+        <strong class="${priCls}">${escHtml(t.priority)}</strong>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Reporter</div>
+      <div class="detail-field-value">${escHtml(t.reporter)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Assignee</div>
+      <div class="detail-field-value">
+        <select class="assignee-select" onchange="updateAssignee('${escHtml(key)}', this.value)">
+          <option value="Sammy ServiceDeskAgent" ${t.assignee==='Sammy ServiceDeskAgent'?'selected':''}>Sammy ServiceDeskAgent</option>
+          <option value="Serena ServiceDeskAgent" ${t.assignee==='Serena ServiceDeskAgent'?'selected':''}>Serena ServiceDeskAgent</option>
+          <option value="Unassigned" ${t.assignee==='Unassigned'?'selected':''}>Unassigned</option>
+        </select>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Created</div>
+      <div class="detail-field-value">${escHtml(t.created)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Time to Resolution</div>
+      <div class="detail-field-value ${t.slaOverdue ? 'sla-overdue' : 'sla-ok'}">${escHtml(t.sla)}</div>
+    </div>`;
+
+  document.getElementById('detail-description').textContent = t.description;
+
+  // Reset activity tab
+  switchActivityTab('log', document.querySelector('.activity-tab'));
+
+  renderActivityLog(key);
+
+  // Show overlay + panel
+  const overlay = document.getElementById('detail-overlay');
+  const panel   = document.getElementById('detail-panel');
+  overlay.style.display = 'block';
+  // Force reflow so transition plays
+  panel.getBoundingClientRect();
+  panel.classList.add('open');
+}
+
+function closeTicketDetail() {
+  const overlay = document.getElementById('detail-overlay');
+  const panel   = document.getElementById('detail-panel');
+  panel.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 230);
+  currentDetailKey = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('detail-overlay')) {
+    closeTicketDetail();
+  }
+}
+
+// ─── CHANGE STATUS ────────────────────────────────────────────
+
+function changeDetailStatus(newStatus) {
+  if (!currentDetailKey) return;
+  const t = ticketByKey(currentDetailKey);
+  if (!t) return;
+  t.status = newStatus;
+
+  // Update badge in panel
+  const badge = document.getElementById('detail-status-badge');
+  badge.className = 'status-badge ' + statusClass(newStatus);
+  badge.textContent = newStatus;
+
+  // Update row in table (in-place, no full re-render)
+  updateStatusCell(currentDetailKey);
+}
+
+// ─── UPDATE ASSIGNEE ──────────────────────────────────────────
+
+function updateAssignee(key, newAssignee) {
+  const t = ticketByKey(key);
+  if (!t) return;
+  t.assignee = newAssignee;
+  t.assigneeInitials = avatarInitials(newAssignee);
+  // Re-render just the assignee cell in the table row
+  const row = document.getElementById('row-' + key);
+  if (row) {
+    const cells = row.querySelectorAll('td');
+    // assignee is index 5
+    const avaClass = assigneeAvatarClass(newAssignee);
+    cells[5].innerHTML = `
+      <div class="assignee-cell">
+        <div class="assignee-avatar ${avaClass}">${escHtml(avatarInitials(newAssignee))}</div>
+        <span>${escHtml(newAssignee)}</span>
+      </div>`;
+  }
+}
+
+// ─── ACTIVITY ─────────────────────────────────────────────────
+
+function switchActivityTab(tab, clickedEl) {
+  document.querySelectorAll('.activity-tab').forEach(t => t.classList.remove('active'));
+  if (clickedEl) clickedEl.classList.add('active');
+
+  const logDiv  = document.getElementById('activity-log');
+  const formDiv = document.getElementById('comment-form');
+
+  if (tab === 'log') {
+    logDiv.style.display = 'block';
+    formDiv.classList.remove('visible');
+  } else {
+    logDiv.style.display = 'none';
+    formDiv.classList.add('visible');
+    document.getElementById('comment-text').focus();
+  }
+}
+
+function renderActivityLog(key) {
+  const t = ticketByKey(key);
+  const logDiv = document.getElementById('activity-log');
+  if (!t || t.comments.length === 0) {
+    logDiv.innerHTML = '<p class="no-activity">No activity yet.</p>';
+    return;
+  }
+  logDiv.innerHTML = t.comments.map(c => `
+    <div class="activity-item ${c.internal ? 'internal' : ''}">
+      <div class="activity-meta">
+        <strong>${escHtml(c.author)}</strong>
+        ${c.internal ? '<span class="activity-note-badge">Internal note</span>' : ''}
+        &nbsp;·&nbsp; ${escHtml(c.timestamp)}
+      </div>
+      <div class="activity-text">${escHtml(c.text)}</div>
+    </div>`).join('');
+}
+
+function submitComment(isInternal) {
+  const text = document.getElementById('comment-text').value.trim();
+  if (!text) return;
+  const t = ticketByKey(currentDetailKey);
+  if (!t) return;
+  t.comments.push({
+    author: 'You',
+    text,
+    timestamp: formatNow(),
+    internal: isInternal,
+  });
+  document.getElementById('comment-text').value = '';
+  renderActivityLog(currentDetailKey);
+  // Switch back to log tab to show the new comment
+  switchActivityTab('log', document.querySelectorAll('.activity-tab')[0]);
+}
+
+// ─── CREATE MODAL ─────────────────────────────────────────────
+
+function openCreateModal() {
+  document.getElementById('modal-overlay').classList.add('visible');
+  document.getElementById('form-summary').value = '';
+  document.getElementById('form-description').value = '';
+  document.getElementById('form-summary').classList.remove('error');
+  document.getElementById('form-summary-error').classList.remove('visible');
+}
+
+function closeCreateModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    closeCreateModal();
+  }
+}
+
+function typeToRequestType(type) {
+  const map = {
+    'incident':        { label: 'Report a system problem', icon: '⚠' },
+    'service-request': { label: 'Service request',          icon: '📨' },
+    'problem':         { label: 'Investigate a problem',    icon: '🔍' },
+    'change':          { label: 'Change request',           icon: '🔄' },
+  };
+  return map[type] || { label: 'Service request', icon: '📨' };
+}
+
+function priorityToIcon(p) {
+  const map = { P1: '↑↑', P2: '↑', P3: '→', P4: '↓' };
+  return map[p] || '→';
+}
+
+function submitCreateForm() {
+  const summaryEl = document.getElementById('form-summary');
+  const errorEl   = document.getElementById('form-summary-error');
+  const summary   = summaryEl.value.trim();
+
+  if (!summary) {
+    summaryEl.classList.add('error');
+    errorEl.classList.add('visible');
+    summaryEl.focus();
+    return;
+  }
+
+  summaryEl.classList.remove('error');
+  errorEl.classList.remove('visible');
+
+  const type        = document.getElementById('form-type').value;
+  const description = document.getElementById('form-description').value.trim();
+  const priority    = document.getElementById('form-priority').value;
+  const assignee    = document.getElementById('form-assignee').value;
+  const rtInfo      = typeToRequestType(type);
+
+  const today = new Date();
+  const createdStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '/');
+
+  const newTicket = {
+    key: 'ITSM-' + nextKey++,
+    requestType: rtInfo.label,
+    requestTypeIcon: rtInfo.icon,
+    type,
+    summary,
+    reporter: 'You',
+    assignee,
+    assigneeInitials: avatarInitials(assignee),
+    status: 'WAITING FOR SUPPORT',
+    created: createdStr,
+    sla: '8h 0m',
+    slaOverdue: false,
+    priority,
+    priorityIcon: priorityToIcon(priority),
+    description: description || '(No description provided.)',
+    comments: [],
+  };
+
+  tickets.unshift(newTicket);
+  renderTicketList();
+  closeCreateModal();
+}
+
+// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('modal-overlay').classList.contains('visible')) {
+      closeCreateModal();
+    } else if (currentDetailKey) {
+      closeTicketDetail();
+    }
+  }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────
+
+renderTicketList();
+</script>
+</body>
+</html>
